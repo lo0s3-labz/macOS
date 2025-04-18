@@ -1,68 +1,91 @@
-# macOS
-macOS OffSec Work
-- chrome_debug
-- socks_proxy
-- persistence
+# macOS Offensive Toolkit
 
+This repository contains modular components built to support macOS post-exploitation and red team operations. The focus is on minimal-touch, in-memory, and native approaches using Swift-based payloads and Mythic C2 integration.
 
-## chrome_debug
+---
+
+## `chrome_debug`
 
 **Author:** Matthew Trautman
 **Platform:** macOS  
 **Language:** Swift  
-**Agent:** Hermes
+**Mythic Agent:** Hermes
 
----
+### 🔍 Overview
 
-### Description
+Launches Google Chrome on the target with the **remote debugging port enabled**, allowing tools like [White Chocolate Macadamia Nut (WCMN)](https://github.com/outflanknl/WCMN) to access Chrome session data using the DevTools Protocol. This enables high-value cookie/session theft without dropping payloads.
 
-`chrome_debug` is a Hermes command that launches Google Chrome on the target macOS system with the **remote debugging port enabled**, allowing tools like [White Chocolate Macadamia Nut (WCMN)](https://github.com/outflanknl/WCMN) to access Chrome session data via the DevTools Protocol.
+### 🧠 Behavior
 
-This enables cookie/session extraction without writing any payloads to disk on the target.
-
----
-
-### Behavior
-
-- Kills all existing instances of Chrome
-- Waits briefly to ensure all processes are closed
-- Relaunches Chrome with:
+- Kills any existing Chrome processes
+- Waits a few seconds
+- Relaunches Chrome with flags:
   - `--remote-debugging-port=9922`
   - `--restore-last-session`
-  - `--user-data-dir` to persist login sessions
-  - `--remote-allow-origins=*` for unrestricted DevTools access
+  - `--user-data-dir=...`
+  - `--remote-allow-origins=*`
 
----
-
-### Example Mythic Tasking
-
+### 🧪 Example Tasking
 ```json
 chrome_debug {}
 ```
 
----
-
-### Typical Use Case
-
-Used in combination with:
-- [`socks_proxy`](../socks_proxy) to forward DevTools traffic from the operator box to the target
-- `WCMN` or other DevTools-based session stealers running remotely
+### ⚔️ Use Case
+Use this to prep a macOS target for remote cookie/session extraction through:
+- A `socks_proxy` Hermes command
+- External tooling like WCMN (running from the C2 or dev box)
 
 ---
 
-### Operational Flow
+## `socks_proxy`
+
+**Author:** Matthew Trautman
+**Platform:** macOS  
+**Language:** Swift  
+**Mythic Agent:** Hermes
+
+### 🔍 Overview
+
+Creates a native **SOCKS5 proxy** listener on the target that routes connections from the operator through to the target machine. Used for post-exploitation tunneling (e.g. accessing Chrome DevTools at `127.0.0.1:9222`).
+
+### 🧠 Behavior
+
+- Starts a TCP listener (default port: `1080`, configurable)
+- Implements SOCKS5 handshake and `CONNECT` handling
+- Streams data bidirectionally between operator and internal target ports
+
+### 🧪 Example Tasking
+```json
+socks_proxy {
+  "port": "1080"
+}
+```
+
+### ⚔️ Use Case
+Use this to tunnel WCMN traffic or interact with internal-only macOS services without dropping payloads on disk.
+
+---
+
+## 🧱 Operational Flow
 
 ```text
 [C2 Server]
  └─ WCMN (Go)
-     └─ SOCKS5 proxy ➝ Hermes agent
-             └─ localhost:9922 (target Chrome DevTools)
+     └─ SOCKS5 ➝ Hermes agent (Swift)
+             └─ 127.0.0.1:9222 (Chrome Debugging on Target)
 ```
 
 ---
 
-### Notes
+## 📌 Notes
 
-- Ensure Chrome is installed in `/Applications`
-- Verify Chrome was launched with the correct user data directory
-- Confirm no pop-ups or restore dialogs interfere with session state
+- Ensure Chrome is located in `/Applications`
+- DevTools access only works while Chrome is running with the debug flag
+- Use in conjunction with Mythic C2 for full visibility and chaining
+
+---
+
+## 📂 Coming Soon
+- `launch_agent`: Persistent LaunchAgent installation
+
+Stay tuned.
