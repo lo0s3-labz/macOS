@@ -13,7 +13,7 @@ This repository contains modular components built to support macOS post-exploita
 
 ### 🔍 Overview
 
-Launches Google Chrome on the target with the **remote debugging port enabled**, allowing tools like [White Chocolate Macadamia Nut (WCMN)](https://github.com/outflanknl/WCMN) to access Chrome session data using the DevTools Protocol. This enables high-value cookie/session theft without dropping payloads.
+Launches Google Chrome on the target with the **remote debugging port enabled**, allowing tools like [White Chocolate Macadamia Nut (WCMN)](https://github.com/slyd0g/WhiteChocolateMacademiaNut) to access Chrome session data using the DevTools Protocol. This enables high-value cookie/session theft without dropping payloads.
 
 ### 🧠 Behavior
 
